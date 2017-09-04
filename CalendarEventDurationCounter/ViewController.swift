@@ -7,12 +7,16 @@
 //
 
 import Cocoa
+import EventKit
 
 class ViewController: NSViewController {
 
+    @IBOutlet weak var outputTextLabel: NSTextField!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
+        checkCalendarAuthorizationStatus();
         // Do any additional setup after loading the view.
     }
 
@@ -23,5 +27,75 @@ class ViewController: NSViewController {
     }
 
 
+    fileprivate func checkCalendarAuthorizationStatus() {
+        
+        let status = EKEventStore.authorizationStatus(for: .event)
+        
+        switch (status) {
+        case .notDetermined:
+            requestAccessToCalendars()
+        case .authorized:
+            loadCalendars()
+        case .restricted, .denied:
+            print("Access to Calendars either _restricted_ or _denied_")
+        }
+        
+        
+    }
+    
+    fileprivate func requestAccessToCalendars() {
+        
+        EKEventStore().requestAccess(to: .event, completion: {
+        
+            (accessGranted: Bool, error: Error?) in
+            
+            if accessGranted {
+                DispatchQueue.main.async(execute: { self.loadCalendars() })
+            } else {
+                DispatchQueue.main.async( execute: { print("Didn't manage to get access to calendars") } )
+            }
+            
+        })
+        
+    }
+    
+    fileprivate func loadCalendars() {
+        
+        EKEventStore().calendars(for: .event).forEach {
+        
+            if $0.title == "hybris" {
+            
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd"
+                
+                let startDate = dateFormatter.date(from: "2016-01-01")
+                let endDate = dateFormatter.date(from: "2017-09-01")
+                
+                let eventsPredicate = EKEventStore().predicateForEvents(withStart: startDate!,
+                                                                        end: endDate!, calendars: [$0])
+                
+                let events = EKEventStore().events(matching: eventsPredicate).sorted(){
+                    (e1: EKEvent, e2: EKEvent) -> Bool in
+                    return e1.startDate.compare(e2.startDate) == ComparisonResult.orderedAscending
+                }
+            
+                var string = ""
+                events.forEach {
+                    let startDate = $0.startDate
+                    let endDate = $0.endDate
+                    
+                    let interval = endDate.timeIntervalSince(startDate)
+                    
+                    string += "\neventName = \($0.title)."
+                    string += ". Duration = \(interval / (60 * 60)) hours"
+                    
+                }
+                
+                self.outputTextLabel.stringValue = string
+
+            }
+        
+        }
+    }
 }
 
