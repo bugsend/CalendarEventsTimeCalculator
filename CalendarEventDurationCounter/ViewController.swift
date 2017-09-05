@@ -63,13 +63,13 @@ class ViewController: NSViewController {
         
         EKEventStore().calendars(for: .event).forEach {
         
-            if $0.title == "hybris" {
+            if $0.title == "bw" {
             
                 let dateFormatter = DateFormatter()
                 dateFormatter.dateFormat = "yyyy-MM-dd"
                 
                 let startDate = dateFormatter.date(from: "2016-01-01")
-                let endDate = dateFormatter.date(from: "2017-09-01")
+                let endDate = dateFormatter.date(from: "2017-09-06")
                 
                 let eventsPredicate = EKEventStore().predicateForEvents(withStart: startDate!,
                                                                         end: endDate!, calendars: [$0])
@@ -80,6 +80,7 @@ class ViewController: NSViewController {
                 }
             
                 var string = ""
+                var totalTime: Double = 0.0
                 events.forEach {
                     let startDate = $0.startDate
                     let endDate = $0.endDate
@@ -87,9 +88,14 @@ class ViewController: NSViewController {
                     let interval = endDate.timeIntervalSince(startDate)
                     
                     string += "\neventName = \($0.title)."
-                    string += ". Duration = \(interval / (60 * 60)) hours"
+                    let duration: Double = interval / (60 * 60)
+                    string += ". Duration = \(duration) hours"
+                    
+                    totalTime.add(duration)
                     
                 }
+                
+                string += "\n\n\nTotal time: = \(totalTime) hours"
                 
                 self.outputTextLabel.stringValue = string
 
