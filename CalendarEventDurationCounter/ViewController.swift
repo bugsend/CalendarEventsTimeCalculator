@@ -87,9 +87,13 @@ class ViewController: NSViewController {
                     
                     let interval = endDate.timeIntervalSince(startDate)
                     
-                    string += "\neventName = \($0.title)."
+                    string += "\n\neventName = \($0.title)."
                     let duration: Double = interval / (60 * 60)
                     string += ". Duration = \(duration) hours"
+                    
+                    if $0.hasNotes {
+                        string += ("\n\t" + $0.notes!)
+                    }
                     
                     totalTime.add(duration)
                     
