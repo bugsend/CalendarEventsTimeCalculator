@@ -69,7 +69,7 @@ class ViewController: NSViewController {
                 dateFormatter.dateFormat = "yyyy-MM-dd"
                 
                 let startDate = dateFormatter.date(from: "2016-01-01")
-                let endDate = dateFormatter.date(from: "2017-09-06")
+                let endDate = dateFormatter.date(from: "2017-12-30")
                 
                 let eventsPredicate = EKEventStore().predicateForEvents(withStart: startDate!,
                                                                         end: endDate!, calendars: [$0])
